@@ -30,6 +30,7 @@ class ImageEditor:
     def __init__(self, args) -> None:
         self.args = args
         os.makedirs(self.args.output_path, exist_ok=True)
+        self.args.output_path = f"output/{self.args.prompt}_{self.args.original}"
 
         self.ranked_results_path = Path(os.path.join(self.args.output_path, RANKED_RESULTS_DIR))
         os.makedirs(self.ranked_results_path, exist_ok=True)
@@ -172,6 +173,7 @@ class ImageEditor:
             with torch.enable_grad():
                 x = x.detach().requires_grad_()
                 t = self.unscale_timestep(t)
+                print(f"t:{t}")
 
                 out = self.diffusion.p_mean_variance(
                     self.model, x, t, clip_denoised=False, model_kwargs={"y": y}
