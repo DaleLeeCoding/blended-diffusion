@@ -131,8 +131,8 @@ class ImageEditor:
         text_embed_pr = self.clip_model.encode_text(
             clip.tokenize(self.args.prompt).to(self.device)
         ).float()
-        text_embed_rf = self.clip_model.encode_text(
-            clip.tokenize(self.args.reference).to(self.device)
+        text_embed_or = self.clip_model.encode_text(
+            clip.tokenize(self.args.original).to(self.device)
         ).float()
 
         self.image_size = (self.model_config["image_size"], self.model_config["image_size"])
@@ -184,8 +184,8 @@ class ImageEditor:
                 loss = torch.tensor(0)
                 if self.args.clip_guidance_lambda != 0:
                     clip_loss_pr = self.clip_loss(x_in, text_embed_pr) * self.args.clip_guidance_lambda
-                    clip_loss_rf = self.clip_loss(x_in, text_embed_rf) * self.args.clip_guidance_lambda
-                    clip_loss = clip_loss_pr-clip_loss_rf
+                    clip_loss_or = self.clip_loss(x_in, text_embed_or) * self.args.clip_guidance_lambda
+                    clip_loss = clip_loss_pr-clip_loss_or
                     loss = loss + clip_loss
                     self.metrics_accumulator.update_metric("clip_loss", clip_loss.item())
 
@@ -280,10 +280,14 @@ class ImageEditor:
                         pred_image = pred_image.add(1).div(2).clamp(0, 1)
                         pred_image_pil = TF.to_pil_image(pred_image)
                         masked_pred_image = self.mask * pred_image.unsqueeze(0)
-                        final_distance = self.unaugmented_clip_distance(
+                        prompt_distance = self.unaugmented_clip_distance(
                             masked_pred_image, text_embed_pr
                         )
-                        formatted_distance = f"{final_distance:.4f}"
+                        original_distance = self.unaugmented_clip_distance(
+                            masked_pred_image, text_embed_or
+                        )
+                        final_distance = prompt_distance - original_distance
+                        formatted_distance = f"{prompt_distance:.4f} {final_distance:.4f} {original_distance:.4f}"
 
                         if self.args.export_assets:
                             pred_path = self.assets_path / visualization_path.name
