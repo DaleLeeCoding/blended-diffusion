@@ -173,7 +173,9 @@ class ImageEditor:
             with torch.enable_grad():
                 x = x.detach().requires_grad_()
                 t = self.unscale_timestep(t)
-                print(f"t:{t}")
+                # print(f"t/:{t[0].item()}")
+                # print(f"total_steps/:{total_steps}")
+                # print(f"t/(total_steps-1):{t[0].item()/(total_steps)}")
 
                 out = self.diffusion.p_mean_variance(
                     self.model, x, t, clip_denoised=False, model_kwargs={"y": y}
@@ -186,7 +188,7 @@ class ImageEditor:
                 loss = torch.tensor(0)
                 if self.args.clip_guidance_lambda != 0:
                     clip_loss_pr = self.clip_loss(x_in, text_embed_pr) * self.args.clip_guidance_lambda
-                    clip_loss_or = self.clip_loss(x_in, text_embed_or) * self.args.clip_guidance_lambda
+                    clip_loss_or = self.clip_loss(x_in, text_embed_or) * self.args.clip_guidance_lambda * (t[0].item()/(total_steps))
                     clip_loss = clip_loss_pr-clip_loss_or
                     loss = loss + clip_loss
                     self.metrics_accumulator.update_metric("clip_loss", clip_loss.item())
