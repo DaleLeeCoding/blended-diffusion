@@ -9,7 +9,7 @@ def get_arguments() -> argparse.Namespace:
         "-p", "--prompt", type=str, help="The prompt for the desired editing", required=True
     )
     parser.add_argument(
-        "-r", "--reference", type=str, help="The reference for the original editing", required=True
+        "-r", "--reference", type=str, help="The reference for the original editing", required=False
     )
     parser.add_argument(
         "-i", "--init_image", type=str, help="The path to the source image input", required=True

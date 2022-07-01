@@ -128,11 +128,8 @@ class ImageEditor:
         return dists.item()
 
     def edit_image_by_prompt(self):
-        text_embed_pr = self.clip_model.encode_text(
+        text_embed = self.clip_model.encode_text(
             clip.tokenize(self.args.prompt).to(self.device)
-        ).float()
-        text_embed_rf = self.clip_model.encode_text(
-            clip.tokenize(self.args.reference).to(self.device)
         ).float()
 
         self.image_size = (self.model_config["image_size"], self.model_config["image_size"])
@@ -183,9 +180,7 @@ class ImageEditor:
 
                 loss = torch.tensor(0)
                 if self.args.clip_guidance_lambda != 0:
-                    clip_loss_pr = self.clip_loss(x_in, text_embed_pr) * self.args.clip_guidance_lambda
-                    clip_loss_rf = self.clip_loss(x_in, text_embed_rf) * self.args.clip_guidance_lambda
-                    clip_loss = clip_loss_pr-clip_loss_rf
+                    clip_loss = self.clip_loss(x_in, text_embed) * self.args.clip_guidance_lambda
                     loss = loss + clip_loss
                     self.metrics_accumulator.update_metric("clip_loss", clip_loss.item())
 
@@ -286,7 +281,7 @@ class ImageEditor:
                         pred_image_pil = TF.to_pil_image(pred_image)
                         masked_pred_image = self.mask * pred_image.unsqueeze(0)
                         final_distance = self.unaugmented_clip_distance(
-                            masked_pred_image, text_embed_pr
+                            masked_pred_image, text_embed
                         )
                         formatted_distance = f"{final_distance:.4f}"
 
