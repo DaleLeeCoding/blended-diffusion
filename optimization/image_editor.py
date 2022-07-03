@@ -30,6 +30,7 @@ class ImageEditor:
     def __init__(self, args) -> None:
         self.args = args
         os.makedirs(self.args.output_path, exist_ok=True)
+        self.args.output_path = f"output/{self.args.category}/{self.args.prompt[:80]}"
 
         self.ranked_results_path = Path(os.path.join(self.args.output_path, RANKED_RESULTS_DIR))
         os.makedirs(self.ranked_results_path, exist_ok=True)
