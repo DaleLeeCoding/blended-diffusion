@@ -7,10 +7,9 @@ if __name__ == "__main__":
     args = get_arguments()
     xlsx = pd.read_excel('./DrawBench Prompts.xlsx')
     idx = 0
-    flag = 114
     for pr, cat in zip(xlsx['Prompts'], xlsx['Category']):
         idx += 1
-        if idx > flag:
+        if idx < 112 or idx > 114:
             args.prompt = pr
             args.category = cat
             print(f"Prompt: {args.prompt}")
